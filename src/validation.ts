@@ -94,9 +94,7 @@ function validateMessage(msg: unknown, index: number): ValidationResult {
   return { valid: true };
 }
 
-/**
- * Sanitiza y aplica límites a los parámetros del modelo
- */
+
 export function sanitizeModelParams(request: ChatRequest) {
   return {
     messages: request.messages,
