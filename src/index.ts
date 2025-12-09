@@ -1,6 +1,6 @@
-
 import { checkRateLimit, Env } from './rate-limit';
 import { validateRequest, sanitizeModelParams, ChatRequest } from './validation';
+import { ExecutionContext } from '@cloudflare/workers-types';
 import { getCorsHeaders, jsonResponse, errorResponse, getClientIP } from './utils';
 import { getConfig } from './config';
 
@@ -25,9 +25,11 @@ interface OVHResponse {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const config = getConfig(env);
 
+  
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
@@ -66,8 +68,8 @@ export default {
         return errorResponse(validation.error || 'Invalid request');
       }
 
-    const safeParams = sanitizeModelParams(body as ChatRequest, config);
-//
+      const safeParams = sanitizeModelParams(body as ChatRequest, config);
+
       const { frequency_penalty, presence_penalty, ...paramsToSend } = safeParams;
 
       const controller = new AbortController();
@@ -79,7 +81,6 @@ export default {
         const endpointURL = config.ovh.endpoint;
         const modelName = config.ovh.model || 'gpt-oss-120b';
 
-       
         const ovhResponse = await fetch(endpointURL, {
           method: 'POST',
           headers: {
