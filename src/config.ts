@@ -1,19 +1,19 @@
 export const getConfig = (env: any) => {
   return {
     rateLimit: {
-      maxRequests: 20,
+      maxRequests: 100,
       windowMs: 3600000,
     },
 
     validation: {
-      maxMessages: 20,
+      maxMessages: 50,
       maxMessageLength: 2000,
       allowedRoles: ['system', 'user', 'assistant'] as const,
     },
 
     model: {
-      maxTokens: 1000,
-      defaultTemperature: 0.6,
+      maxTokens: 4000,
+      defaultTemperature: 0.7,
       minTemperature: 0.0,
       maxTemperature: 1.0,
       frequencyPenalty: 0.5,
@@ -21,12 +21,12 @@ export const getConfig = (env: any) => {
     },
 
     budget: {
-      dailyTokenLimit: 100000,
+      dailyTokenLimit: 500000,
       alertThreshold: 0.8,
     },
 
     timeout: {
-      requestTimeout: 30000,
+      requestTimeout: 60000,
     },
 
     cors: {
@@ -36,9 +36,8 @@ export const getConfig = (env: any) => {
     },
 
     ovh: {
-      endpoint: 
-'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
-    model: env.OVH_MODEL_NAME,
+      endpoint: env.OVH_EP_URL,
+      model: env.OVH_MODEL_NAME,
     },
   } as const;
 };
