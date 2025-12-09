@@ -6,11 +6,11 @@ export const getConfig = (env: any) => {
     },
     validation: {
       maxMessages: 50,
-      maxMessageLength: 2000,
+      maxMessageLength: 50000,
       allowedRoles: ['system', 'user', 'assistant'] as const,
     },
     model: {
-      maxTokens: 4000, // ← Cambio seguro
+      maxTokens: 4000,
       defaultTemperature: 0.7,
       minTemperature: 0.0,
       maxTemperature: 1.0,
