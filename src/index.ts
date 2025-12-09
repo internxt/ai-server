@@ -1,5 +1,5 @@
 import { CONFIG } from './config';
-import { checkRateLimit, checkDailyBudget, recordUsage, Env } from './rate-limit';
+import { checkRateLimit, Env } from './rate-limit';
 import { validateRequest, sanitizeModelParams, ChatRequest } from './validation';
 import { getCorsHeaders, jsonResponse, errorResponse, getClientIP } from './utils';
 
@@ -38,8 +38,7 @@ export default {
 
     try {
       const clientIP = getClientIP(request);
-      console.log(`Request from IP: ${clientIP}`);
-
+      
       const rateLimitResult = await checkRateLimit(clientIP, env);
       if (!rateLimitResult.allowed) {
         return errorResponse(
@@ -65,20 +64,6 @@ export default {
       }
 
       const safeParams = sanitizeModelParams(body as ChatRequest);
-      const estimatedTokens = safeParams.max_tokens;
-      const budgetCheck = await checkDailyBudget(estimatedTokens, env);
-      
-      if (!budgetCheck.allowed) {
-        return errorResponse(
-          'Daily budget exceeded',
-          429,
-          {
-            message: 'Daily token limit reached. Try again tomorrow.',
-            current: budgetCheck.current,
-            limit: budgetCheck.limit,
-          }
-        );
-      }
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), CONFIG.timeout.requestTimeout);
@@ -110,12 +95,8 @@ export default {
         }
 
         const data = await ovhResponse.json() as OVHResponse;
-        const tokensUsed = data.usage?.total_tokens || estimatedTokens;
-        await recordUsage(tokensUsed, env);
-
-        console.log(`Request successful. Tokens used: ${tokensUsed}`);
-
         return jsonResponse(data);
+
       } catch (error: unknown) {
         clearTimeout(timeoutId);
 
