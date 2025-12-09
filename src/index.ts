@@ -37,7 +37,6 @@ export default {
     }
 
     if (request.method !== 'POST') {
-      
       return errorResponse('Method not allowed', config, 405); 
     }
 
@@ -46,7 +45,6 @@ export default {
       const rateLimitResult = await checkRateLimit(clientIP, env);
 
       if (!rateLimitResult.allowed) {
-        
         return errorResponse(
           'Too many requests',
           config, 
@@ -74,12 +72,21 @@ export default {
 
       const { frequency_penalty, presence_penalty, ...paramsToSend } = safeParams;
 
+      if (paramsToSend.messages && Array.isArray(paramsToSend.messages)) {
+        paramsToSend.messages = paramsToSend.messages.filter((msg: any) => 
+          msg.role && msg.content && typeof msg.content === 'string' && msg.content.trim() !== ''
+        );
+      }
+
+      if (!paramsToSend.max_tokens) {
+        paramsToSend.max_tokens = config.model.maxTokens;
+      }
+
       const controller = new AbortController();
     
       const timeoutId = setTimeout(() => controller.abort(), config.timeout.requestTimeout);
 
       try {
-      
         const endpointURL = config.ovh.endpoint;
         const modelName = config.ovh.model || 'gpt-oss-120b';
 
@@ -120,7 +127,6 @@ export default {
         clearTimeout(timeoutId);
         
         if (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError') {
-         
           return errorResponse('Request timeout', config, 504); 
         }
         
