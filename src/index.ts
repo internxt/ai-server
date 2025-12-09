@@ -29,16 +29,16 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const config = getConfig(env);
 
-  
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
-        headers: getCorsHeaders(),
+        headers: getCorsHeaders(config), 
       });
     }
 
     if (request.method !== 'POST') {
-      return errorResponse('Method not allowed', 405);
+      
+      return errorResponse('Method not allowed', config, 405); 
     }
 
     try {
@@ -46,8 +46,10 @@ export default {
       const rateLimitResult = await checkRateLimit(clientIP, env);
 
       if (!rateLimitResult.allowed) {
+        
         return errorResponse(
           'Too many requests',
+          config, 
           429,
           {
             retryAfter: rateLimitResult.retryAfter,
@@ -60,12 +62,12 @@ export default {
       try {
         body = await request.json();
       } catch {
-        return errorResponse('Invalid JSON body');
+        return errorResponse('Invalid JSON body', config); 
       }
 
       const validation = validateRequest(body, config); 
       if (!validation.valid) {
-        return errorResponse(validation.error || 'Invalid request');
+        return errorResponse(validation.error || 'Invalid request', config); 
       }
 
       const safeParams = sanitizeModelParams(body as ChatRequest, config);
@@ -106,19 +108,20 @@ export default {
           
           return errorResponse(
             'AI service error',
+            config, 
             ovhResponse.status,
             { details: errorText }
           );
         }
 
         const data = await ovhResponse.json() as OVHResponse;
-        return jsonResponse(data);
-
+        return jsonResponse(data, config); 
       } catch (error: unknown) {
         clearTimeout(timeoutId);
         
         if (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError') {
-          return errorResponse('Request timeout', 504);
+         
+          return errorResponse('Request timeout', config, 504); 
         }
         
         throw error;
@@ -127,6 +130,7 @@ export default {
       console.error('Unexpected error:', error);
       return errorResponse(
         'Internal server error',
+        config, 
         500,
         { message: error instanceof Error ? error.message : 'Unknown error' }
       );

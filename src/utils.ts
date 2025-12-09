@@ -1,25 +1,22 @@
-import { CONFIG } from './config';
-
-
-export function getCorsHeaders(): Record<string, string> {
+export function getCorsHeaders(config: any): Record<string, string> {
   return {
-    'Access-Control-Allow-Origin': CONFIG.cors.allowOrigin,
-    'Access-Control-Allow-Methods': CONFIG.cors.allowMethods.join(', '),
-    'Access-Control-Allow-Headers': CONFIG.cors.allowHeaders.join(', '),
+    'Access-Control-Allow-Origin': config.cors.allowOrigin,
+    'Access-Control-Allow-Methods': config.cors.allowMethods.join(', '),
+    'Access-Control-Allow-Headers': config.cors.allowHeaders.join(', '),
     'Content-Type': 'application/json',
   };
 }
 
-
 export function jsonResponse(
   data: unknown,
+  config: any,
   status = 200,
   additionalHeaders: Record<string, string> = {}
 ): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      ...getCorsHeaders(),
+      ...getCorsHeaders(config),
       ...additionalHeaders,
     },
   });
@@ -28,6 +25,7 @@ export function jsonResponse(
 
 export function errorResponse(
   message: string,
+  config: any, 
   status = 400,
   additionalData: Record<string, unknown> = {}
 ): Response {
@@ -36,6 +34,7 @@ export function errorResponse(
       error: message,
       ...additionalData,
     },
+    config,
     status
   );
 }
@@ -47,7 +46,6 @@ export function getClientIP(request: Request): string {
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
-
 
 export function getTodayKey(): string {
   return new Date().toISOString().split('T')[0];
