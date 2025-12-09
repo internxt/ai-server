@@ -1,6 +1,6 @@
 export interface Env {
   OVH_MODEL_NAME: string;
-  OVH_AI_TOKEN: string;
+  OVH_API_TOKEN: string;
   OVH_EP_URL: string;
   rate_limiter: {
     limit: (options: { key: string }) => Promise<{ success: boolean }>;
