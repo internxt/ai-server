@@ -29,9 +29,9 @@ export const getConfig = (env: any) => {
       allowMethods: ['POST', 'OPTIONS'],
       allowHeaders: ['Content-Type'],
     },
-    ovh: {
-      endpoint: env.OVH_EP_URL,
-      model: env.OVH_MODEL_NAME,
-    },
+     ovh: {
+    endpoint: 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
+    model: 'gpt-oss-120b',
+  },
   } as const;
 };
