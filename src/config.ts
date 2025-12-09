@@ -40,7 +40,7 @@ export const CONFIG = {
 
 
   ovh: {
-    endpoint: 'https://gpt-oss-120b.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
+    endpoint: 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
     model: 'gpt-oss-120b',
   },
 } as const;

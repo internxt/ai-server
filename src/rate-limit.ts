@@ -1,5 +1,7 @@
 export interface Env {
+  OVH_MODEL_NAME: string;
   OVH_AI_TOKEN: string;
+  OVH_EP_URL: string;
   rate_limiter: {
     limit: (options: { key: string }) => Promise<{ success: boolean }>;
   };
@@ -20,11 +22,9 @@ export async function checkRateLimit(
 
   try {
     const { success } = await env.rate_limiter.limit({ key: clientIP });
-
     if (!success) {
       return { allowed: false, retryAfter: 60 };
     }
-
     return { allowed: true };
   } catch (error) {
     return { allowed: true };

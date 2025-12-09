@@ -38,8 +38,8 @@ export default {
 
     try {
       const clientIP = getClientIP(request);
-      
       const rateLimitResult = await checkRateLimit(clientIP, env);
+
       if (!rateLimitResult.allowed) {
         return errorResponse(
           'Too many requests',
@@ -64,20 +64,24 @@ export default {
       }
 
       const safeParams = sanitizeModelParams(body as ChatRequest);
+      const { frequency_penalty, presence_penalty, ...paramsToSend } = safeParams;
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), CONFIG.timeout.requestTimeout);
 
       try {
-        const ovhResponse = await fetch(CONFIG.ovh.endpoint, {
+        const endpointURL = env.OVH_EP_URL;
+        const modelName = env.OVH_MODEL_NAME || 'gpt-oss-120b';
+
+        const ovhResponse = await fetch(endpointURL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${env.OVH_AI_TOKEN}`,
+            'Authorization': `Bearer ${env.OVH_API_TOKEN}`,
           },
           body: JSON.stringify({
-            model: CONFIG.ovh.model,
-            ...safeParams,
+            model: modelName,
+            ...paramsToSend,
           }),
           signal: controller.signal,
         });
@@ -86,7 +90,12 @@ export default {
 
         if (!ovhResponse.ok) {
           const errorText = await ovhResponse.text();
-          console.error('OVH API error:', errorText);
+          console.error('OVH API error:', {
+            status: ovhResponse.status,
+            statusText: ovhResponse.statusText,
+            body: errorText
+          });
+          
           return errorResponse(
             'AI service error',
             ovhResponse.status,
@@ -96,14 +105,13 @@ export default {
 
         const data = await ovhResponse.json() as OVHResponse;
         return jsonResponse(data);
-
       } catch (error: unknown) {
         clearTimeout(timeoutId);
-
+        
         if (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError') {
           return errorResponse('Request timeout', 504);
         }
-
+        
         throw error;
       }
     } catch (error) {
