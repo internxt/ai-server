@@ -36,8 +36,9 @@ export const getConfig = (env: any) => {
     },
 
     ovh: {
-      endpoint: env.OVH_EP_URL,
-      model: env.OVH_MODEL_NAME,
+      endpoint: 
+'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
+    model: env.OVH_MODEL_NAME,
     },
   } as const;
 };
