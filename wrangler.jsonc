@@ -1,0 +1,7 @@
+{
+  "name": "ai-server",
+  "main": "src/index.ts",
+  "observability": {
+    "enabled": true
+  }
+}
