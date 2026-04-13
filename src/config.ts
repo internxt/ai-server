@@ -1,24 +1,24 @@
 export const getConfig = (env: any) => {
   return {
     rateLimit: {
-      maxRequests: 100,
+      maxRequests: 50,
       windowMs: 3600000,
     },
     validation: {
-      maxMessages: 50,
+      maxMessages: 25,
       maxMessageLength: 50000,
       allowedRoles: ['system', 'user', 'assistant'] as const,
     },
     model: {
       maxTokens: 4000,
-      defaultTemperature: 0.7,
+      defaultTemperature: 0.75,
       minTemperature: 0.0,
       maxTemperature: 1.0,
       frequencyPenalty: 0.5,
       presencePenalty: 0.3,
     },
     budget: {
-      dailyTokenLimit: 500000,
+      dailyTokenLimit: 5000000,
       alertThreshold: 0.8,
     },
     timeout: {

@@ -1,4 +1,4 @@
-import { checkRateLimit, Env } from './rate-limit';
+import { checkRateLimit, checkDailyBudget, recordTokenUsage, Env } from './rate-limit';
 import { validateRequest, sanitizeModelParams, ChatRequest } from './validation';
 import { ExecutionContext } from '@cloudflare/workers-types';
 import { getCorsHeaders, jsonResponse, errorResponse, getClientIP } from './utils';
@@ -41,19 +41,13 @@ export default {
     }
 
     try {
-      const clientIP = getClientIP(request);
-      const rateLimitResult = await checkRateLimit(clientIP, env);
+      if (!checkDailyBudget(config).allowed) {
+        return errorResponse('Daily token limit reached', config, 429);
+      }
 
-      if (!rateLimitResult.allowed) {
-        return errorResponse(
-          'Too many requests',
-          config, 
-          429,
-          {
-            retryAfter: rateLimitResult.retryAfter,
-            message: `Rate limit exceeded. Try again in ${rateLimitResult.retryAfter} seconds.`,
-          }
-        );
+      const clientIP = getClientIP(request);
+      if (!checkRateLimit(clientIP, config).allowed) {
+        return errorResponse('Too many requests', config, 429);
       }
 
       let body: unknown;
@@ -122,7 +116,10 @@ export default {
         }
 
         const data = await ovhResponse.json() as OVHResponse;
-        return jsonResponse(data, config); 
+        if (data.usage?.total_tokens) {
+          recordTokenUsage(data.usage.total_tokens);
+        }
+        return jsonResponse(data, config);
       } catch (error: unknown) {
         clearTimeout(timeoutId);
         
