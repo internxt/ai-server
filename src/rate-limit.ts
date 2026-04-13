@@ -11,7 +11,6 @@ export interface Env {
 
 export interface RateLimitResult {
   allowed: boolean;
-  retryAfter?: number;
 }
 
 interface IpEntry {
@@ -25,7 +24,6 @@ interface DailyBudget {
 }
 
 const ipStore = new Map<string, IpEntry>();
-
 
 const dailyBudget: DailyBudget = {
   day: new Date().toISOString().split('T')[0],
@@ -42,22 +40,11 @@ export function checkDailyBudget(
     dailyBudget.tokensUsed = 0;
   }
 
-  if (dailyBudget.tokensUsed >= config.budget.dailyTokenLimit) {
-    return { allowed: false, retryAfter: secondsUntilMidnight() };
-  }
-
-  return { allowed: true };
+  return { allowed: dailyBudget.tokensUsed < config.budget.dailyTokenLimit };
 }
 
 export function recordTokenUsage(tokens: number): void {
   dailyBudget.tokensUsed += tokens;
-}
-
-function secondsUntilMidnight(): number {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setUTCHours(24, 0, 0, 0);
-  return Math.ceil((midnight.getTime() - now.getTime()) / 1000);
 }
 
 export function checkRateLimit(
@@ -74,8 +61,7 @@ export function checkRateLimit(
     return { allowed: true };
   }
   if (entry.tokens <= 0) {
-    const retryAfter = Math.ceil((entry.windowStart + windowMs - now) / 1000);
-    return { allowed: false, retryAfter };
+    return { allowed: false };
   }
 
   entry.tokens--;

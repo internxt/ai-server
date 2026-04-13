@@ -41,32 +41,13 @@ export default {
     }
 
     try {
-      const budgetResult = checkDailyBudget(config);
-      if (!budgetResult.allowed) {
-        return errorResponse(
-          'Daily token limit reached',
-          config,
-          429,
-          {
-            retryAfter: budgetResult.retryAfter,
-            message: `Daily token limit reached. Try again in ${budgetResult.retryAfter} seconds.`,
-          }
-        );
+      if (!checkDailyBudget(config).allowed) {
+        return errorResponse('Daily token limit reached', config, 429);
       }
 
       const clientIP = getClientIP(request);
-      const rateLimitResult = checkRateLimit(clientIP, config);
-
-      if (!rateLimitResult.allowed) {
-        return errorResponse(
-          'Too many requests',
-          config, 
-          429,
-          {
-            retryAfter: rateLimitResult.retryAfter,
-            message: `Rate limit exceeded. Try again in ${rateLimitResult.retryAfter} seconds.`,
-          }
-        );
+      if (!checkRateLimit(clientIP, config).allowed) {
+        return errorResponse('Too many requests', config, 429);
       }
 
       let body: unknown;
