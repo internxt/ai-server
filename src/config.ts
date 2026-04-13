@@ -18,7 +18,7 @@ export const getConfig = (env: any) => {
       presencePenalty: 0.3,
     },
     budget: {
-      dailyTokenLimit: 40000000,
+      dailyTokenLimit: 5000000,
       alertThreshold: 0.8,
     },
     timeout: {
