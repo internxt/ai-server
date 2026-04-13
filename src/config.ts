@@ -11,7 +11,7 @@ export const getConfig = (env: any) => {
     },
     model: {
       maxTokens: 4000,
-      defaultTemperature: 0.65,
+      defaultTemperature: 0.75,
       minTemperature: 0.0,
       maxTemperature: 1.0,
       frequencyPenalty: 0.5,
