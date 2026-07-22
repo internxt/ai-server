@@ -4,6 +4,7 @@ export interface Env {
   OVH_MODEL_NAME: string;
   OVH_API_TOKEN: string;
   OVH_EP_URL: string;
+  TURNSTILE_SECRET: string;
   rate_limiter?: {
     limit: (options: { key: string }) => Promise<{ success: boolean }>;
   };
