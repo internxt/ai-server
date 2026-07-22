@@ -3,6 +3,7 @@ import { validateRequest, sanitizeModelParams, ChatRequest } from './validation'
 import { ExecutionContext } from '@cloudflare/workers-types';
 import { getCorsHeaders, jsonResponse, errorResponse, getClientIP } from './utils';
 import { getConfig } from './config';
+import { verifyTurnstile } from './turnstile';
 
 interface OVHResponse {
   id: string;
@@ -48,6 +49,18 @@ export default {
       const clientIP = getClientIP(request);
       if (!checkRateLimit(clientIP, config).allowed) {
         return errorResponse('Too many requests', config, 429);
+      }
+
+      const turnstileToken = request.headers.get('X-Turnstile-Token');
+      const turnstile = await verifyTurnstile(
+        turnstileToken,
+        env.TURNSTILE_SECRET,
+        clientIP !== 'unknown' ? clientIP : undefined
+      );
+      if (!turnstile.success) {
+        return errorResponse('Captcha verification failed', config, 403, {
+          codes: turnstile.errorCodes,
+        });
       }
 
       let body: unknown;

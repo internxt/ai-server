@@ -27,7 +27,7 @@ export const getConfig = (env: any) => {
     cors: {
       allowOrigin: '*',
       allowMethods: ['POST', 'OPTIONS'],
-      allowHeaders: ['Content-Type'],
+      allowHeaders: ['Content-Type', 'X-Turnstile-Token'],
     },
      ovh: {
     endpoint: 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
